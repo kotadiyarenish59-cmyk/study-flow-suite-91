@@ -188,7 +188,7 @@ export const seedPlanner: PlannerEvent[] = [
 export const seedSessions: StudySession[] = Array.from({ length: 7 }, (_, i) => ({
   id: `s${i}`,
   date: dayOffset(i - 6),
-  minutes: [45, 30, 75, 20, 60, 15, 50][i],
+  minutes: [45, 30, 75, 20, 60, 15, 50][i] ?? 30,
 }));
 
 export const achievements: Achievement[] = [
