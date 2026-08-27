@@ -13,6 +13,14 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppGoalsRouteImport } from './routes/app.goals'
+import { Route as AppNotesRouteImport } from './routes/app.notes'
+import { Route as AppPlannerRouteImport } from './routes/app.planner'
+import { Route as AppProgressRouteImport } from './routes/app.progress'
+import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as AppSubjectsRouteImport } from './routes/app.subjects'
+import { Route as AppTasksRouteImport } from './routes/app.tasks'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,37 +42,136 @@ const SignupRoute = SignupRouteImport.update({
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGoalsRoute = AppGoalsRouteImport.update({
+  id: '/goals',
+  path: '/goals',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNotesRoute = AppNotesRouteImport.update({
+  id: '/notes',
+  path: '/notes',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPlannerRoute = AppPlannerRouteImport.update({
+  id: '/planner',
+  path: '/planner',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProgressRoute = AppProgressRouteImport.update({
+  id: '/progress',
+  path: '/progress',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSubjectsRoute = AppSubjectsRouteImport.update({
+  id: '/subjects',
+  path: '/subjects',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTasksRoute = AppTasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/app': typeof AppRoute
+  '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/app/goals': typeof AppGoalsRoute
+  '/app/notes': typeof AppNotesRoute
+  '/app/planner': typeof AppPlannerRoute
+  '/app/progress': typeof AppProgressRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/subjects': typeof AppSubjectsRoute
+  '/app/tasks': typeof AppTasksRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/app': typeof AppRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/app/goals': typeof AppGoalsRoute
+  '/app/notes': typeof AppNotesRoute
+  '/app/planner': typeof AppPlannerRoute
+  '/app/progress': typeof AppProgressRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/subjects': typeof AppSubjectsRoute
+  '/app/tasks': typeof AppTasksRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/app': typeof AppRoute
+  '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/app/goals': typeof AppGoalsRoute
+  '/app/notes': typeof AppNotesRoute
+  '/app/planner': typeof AppPlannerRoute
+  '/app/progress': typeof AppProgressRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/subjects': typeof AppSubjectsRoute
+  '/app/tasks': typeof AppTasksRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app' | '/login' | '/signup'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/login'
+    | '/signup'
+    | '/app/goals'
+    | '/app/notes'
+    | '/app/planner'
+    | '/app/progress'
+    | '/app/settings'
+    | '/app/subjects'
+    | '/app/tasks'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app' | '/login' | '/signup'
-  id: '__root__' | '/' | '/app' | '/login' | '/signup'
+  to:
+    | '/'
+    | '/login'
+    | '/signup'
+    | '/app/goals'
+    | '/app/notes'
+    | '/app/planner'
+    | '/app/progress'
+    | '/app/settings'
+    | '/app/subjects'
+    | '/app/tasks'
+    | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/login'
+    | '/signup'
+    | '/app/goals'
+    | '/app/notes'
+    | '/app/planner'
+    | '/app/progress'
+    | '/app/settings'
+    | '/app/subjects'
+    | '/app/tasks'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AppRoute: typeof AppRoute
+  AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
 }
@@ -99,12 +206,92 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/goals': {
+      id: '/app/goals'
+      path: '/goals'
+      fullPath: '/app/goals'
+      preLoaderRoute: typeof AppGoalsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/notes': {
+      id: '/app/notes'
+      path: '/notes'
+      fullPath: '/app/notes'
+      preLoaderRoute: typeof AppNotesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/planner': {
+      id: '/app/planner'
+      path: '/planner'
+      fullPath: '/app/planner'
+      preLoaderRoute: typeof AppPlannerRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/progress': {
+      id: '/app/progress'
+      path: '/progress'
+      fullPath: '/app/progress'
+      preLoaderRoute: typeof AppProgressRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/subjects': {
+      id: '/app/subjects'
+      path: '/subjects'
+      fullPath: '/app/subjects'
+      preLoaderRoute: typeof AppSubjectsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/tasks': {
+      id: '/app/tasks'
+      path: '/tasks'
+      fullPath: '/app/tasks'
+      preLoaderRoute: typeof AppTasksRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppGoalsRoute: typeof AppGoalsRoute
+  AppNotesRoute: typeof AppNotesRoute
+  AppPlannerRoute: typeof AppPlannerRoute
+  AppProgressRoute: typeof AppProgressRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppSubjectsRoute: typeof AppSubjectsRoute
+  AppTasksRoute: typeof AppTasksRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppGoalsRoute: AppGoalsRoute,
+  AppNotesRoute: AppNotesRoute,
+  AppPlannerRoute: AppPlannerRoute,
+  AppProgressRoute: AppProgressRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppSubjectsRoute: AppSubjectsRoute,
+  AppTasksRoute: AppTasksRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AppRoute: AppRoute,
+  AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
 }

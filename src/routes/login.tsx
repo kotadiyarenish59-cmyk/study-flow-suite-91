@@ -27,11 +27,11 @@ function LoginPage() {
   const { signIn } = useStore();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<{ identifier?: string; password?: string }>({});
   const [loading, setLoading] = useState(false);
 
   function validate() {
-    const next: Record<string, string> = {};
+    const next: { identifier?: string; password?: string } = {};
     if (!identifier.trim()) next.identifier = "Enter your email or phone number.";
     else if (!/^\S+@\S+\.\S+$/.test(identifier) && !/^\+?\d[\d\s-]{7,}$/.test(identifier))
       next.identifier = "That doesn't look like a valid email or phone number.";
@@ -50,7 +50,7 @@ function LoginPage() {
     const isEmail = identifier.includes("@");
     signIn({
       id: uid(),
-      name: isEmail ? identifier.split("@")[0] : "Student",
+      name: isEmail ? (identifier.split("@")[0] ?? "Student") : "Student",
       email: isEmail ? identifier : "",
       phone: isEmail ? "" : identifier,
     });

@@ -13,7 +13,7 @@ export function TaskItem({
   onDelete,
 }: {
   task: Task;
-  subjectName?: string;
+  subjectName?: string | undefined;
   onToggle: () => void;
   onEdit?: () => void;
   onDelete?: () => void;

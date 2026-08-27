@@ -49,14 +49,14 @@ function SignupPage() {
     goal: "",
   });
   const [agree, setAgree] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof Fields | "agree", string>>>({});
   const [loading, setLoading] = useState(false);
 
   const set = (key: keyof Fields) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setValues((v) => ({ ...v, [key]: e.target.value }));
 
   function validate() {
-    const next: Record<string, string> = {};
+    const next: Partial<Record<keyof Fields | "agree", string>> = {};
     if (values.name.trim().length < 2) next.name = "Please enter your full name.";
     if (!/^\S+@\S+\.\S+$/.test(values.email)) next.email = "Enter a valid email address.";
     if (!/^\+?\d[\d\s-]{7,}$/.test(values.phone)) next.phone = "Enter a valid phone number.";
