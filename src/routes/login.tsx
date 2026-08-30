@@ -79,7 +79,7 @@ function LoginPage() {
             id="identifier"
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
-            placeholder="you@example.com"
+            placeholder="Enter your email or mobile number"
             aria-invalid={!!errors.identifier}
             aria-describedby={errors.identifier ? "identifier-error" : undefined}
           />

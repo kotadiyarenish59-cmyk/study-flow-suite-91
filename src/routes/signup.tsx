@@ -130,9 +130,9 @@ function SignupPage() {
       }
     >
       <form onSubmit={onSubmit} noValidate className="space-y-4">
-        {field("name", "Full name", "Aarav Sharma")}
-        {field("email", "Email address", "you@example.com", "email")}
-        {field("phone", "Phone number", "+91 98765 43210", "tel")}
+        {field("name", "Full name", "Enter your full name")}
+        {field("email", "Email address", "Enter your email address", "email")}
+        {field("phone", "Phone number", "Enter your mobile number", "tel")}
 
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
@@ -162,7 +162,7 @@ function SignupPage() {
           )}
         </div>
 
-        {field("goal", "Learning goal", "Become a data scientist", "text", true)}
+        {field("goal", "Learning goal", "", "text", true)}
 
         <div>
           <label className="flex items-start gap-2 text-sm text-muted-foreground">
