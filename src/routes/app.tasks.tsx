@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useStore, uid } from "@/lib/store";
+import { sendToWebhook } from "@/lib/webhook";
 import type { Priority } from "@/lib/types";
 
 export const Route = createFileRoute("/app/tasks")({
@@ -43,10 +44,16 @@ function TasksPage() {
     e.preventDefault();
     if (!title.trim()) return;
     const priority: Priority = "medium";
-    setTasks((prev) => [
-      { id: uid(), title: title.trim(), priority, dueDate: today, minutes: 30, completed: false },
-      ...prev,
-    ]);
+    const newTask = {
+      id: uid(),
+      title: title.trim(),
+      priority,
+      dueDate: today,
+      minutes: 30,
+      completed: false,
+    };
+    sendToWebhook(newTask);
+    setTasks((prev) => [newTask, ...prev]);
     setTitle("");
   }
 

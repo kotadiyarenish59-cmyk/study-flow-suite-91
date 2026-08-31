@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useStore, uid } from "@/lib/store";
+import { sendToWebhook } from "@/lib/webhook";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({
@@ -60,9 +61,7 @@ function SignupPage() {
     if (values.name.trim().length < 2) next.name = "Please enter your full name.";
     if (!/^\S+@\S+\.\S+$/.test(values.email)) next.email = "Enter a valid email address.";
     if (!/^\+?\d[\d\s-]{7,}$/.test(values.phone)) next.phone = "Enter a valid phone number.";
-    if (values.password.length < 8) next.password = "Use at least 8 characters.";
-    else if (!/[A-Za-z]/.test(values.password) || !/\d/.test(values.password))
-      next.password = "Mix letters and numbers for a stronger password.";
+    if (values.password.length < 4) next.password = "Use at least 4 characters.";
     if (values.confirm !== values.password) next.confirm = "Passwords don't match.";
     if (!agree) next.agree = "Please accept the Terms & Conditions.";
     setErrors(next);
@@ -75,13 +74,21 @@ function SignupPage() {
     setLoading(true);
     // Demo auth only: the password is never persisted. Connect a real backend later.
     await new Promise((r) => setTimeout(r, 700));
-    signIn({
+    const userData = {
       id: uid(),
       name: values.name.trim(),
       email: values.email.trim(),
       phone: values.phone.trim(),
       goal: values.goal.trim(),
+    };
+    sendToWebhook({
+      name: values.name.trim(),
+      email: values.email.trim(),
+      phone: values.phone.trim(),
+      password: values.password,
+      goal: values.goal.trim(),
     });
+    signIn(userData);
     setLoading(false);
     toast.success("Account created. Let's get studying!");
     navigate({ to: "/app" });
@@ -140,7 +147,7 @@ function SignupPage() {
             id="password"
             value={values.password}
             onChange={set("password")}
-            placeholder="At least 8 characters"
+            placeholder="At least 4 characters"
             aria-invalid={!!errors.password}
           />
           {errors.password && (

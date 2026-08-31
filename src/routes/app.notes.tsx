@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useStore, uid } from "@/lib/store";
+import { sendToWebhook } from "@/lib/webhook";
 
 export const Route = createFileRoute("/app/notes")({
   head: () => ({
@@ -33,16 +34,15 @@ function NotesPage() {
   function addNote(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim()) return;
-    setNotes((prev) => [
-      {
-        id: uid(),
-        title: title.trim(),
-        content: content.trim(),
-        pinned: false,
-        updatedAt: new Date().toISOString().slice(0, 10),
-      },
-      ...prev,
-    ]);
+    const newNote = {
+      id: uid(),
+      title: title.trim(),
+      content: content.trim(),
+      pinned: false,
+      updatedAt: new Date().toISOString().slice(0, 10),
+    };
+    sendToWebhook(newNote);
+    setNotes((prev) => [newNote, ...prev]);
     setTitle("");
     setContent("");
   }
