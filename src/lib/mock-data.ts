@@ -40,6 +40,7 @@ export const seedTasks: Task[] = [
     dueDate: dayOffset(0),
     minutes: 30,
     completed: false,
+    status: "todo",
     focus: true,
   },
   {
@@ -50,6 +51,7 @@ export const seedTasks: Task[] = [
     dueDate: dayOffset(0),
     minutes: 45,
     completed: false,
+    status: "todo",
     focus: true,
   },
   {
@@ -60,6 +62,7 @@ export const seedTasks: Task[] = [
     dueDate: dayOffset(0),
     minutes: 20,
     completed: false,
+    status: "todo",
     focus: true,
   },
   {
@@ -70,6 +73,7 @@ export const seedTasks: Task[] = [
     dueDate: dayOffset(1),
     minutes: 60,
     completed: false,
+    status: "todo",
   },
   {
     id: "t5",
@@ -79,6 +83,7 @@ export const seedTasks: Task[] = [
     dueDate: dayOffset(2),
     minutes: 40,
     completed: false,
+    status: "todo",
   },
   {
     id: "t6",
@@ -88,6 +93,7 @@ export const seedTasks: Task[] = [
     dueDate: dayOffset(-1),
     minutes: 35,
     completed: true,
+    status: "completed",
   },
   {
     id: "t7",
@@ -97,6 +103,7 @@ export const seedTasks: Task[] = [
     dueDate: dayOffset(-2),
     minutes: 50,
     completed: true,
+    status: "completed",
   },
   {
     id: "t8",
@@ -106,6 +113,7 @@ export const seedTasks: Task[] = [
     dueDate: dayOffset(-3),
     minutes: 45,
     completed: true,
+    status: "completed",
   },
 ];
 

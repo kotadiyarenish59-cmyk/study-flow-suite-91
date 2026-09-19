@@ -25,7 +25,7 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const { signIn } = useStore();
+  const { login } = useStore();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ identifier?: string; password?: string }>({});
@@ -33,12 +33,31 @@ function LoginPage() {
 
   function validate() {
     const next: { identifier?: string; password?: string } = {};
-    if (!identifier.trim()) next.identifier = "Enter your email or phone number.";
-    else if (!/^\S+@\S+\.\S+$/.test(identifier) && !/^\+?\d[\d\s-]{7,}$/.test(identifier))
-      next.identifier = "That doesn't look like a valid email or phone number.";
-    if (!password) next.password = "Enter your password.";
-    else if (password.length < 4) next.password = "Password must be at least 4 characters.";
+    const trimmedIdentifier = identifier.trim();
+
+    if (!trimmedIdentifier) {
+      next.identifier = "Email or phone number is compulsory.";
+    } else if (trimmedIdentifier.includes("@")) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(trimmedIdentifier)) {
+        next.identifier = "Please enter a valid email address.";
+      }
+    } else {
+      const cleanPhone = trimmedIdentifier.replace(/[\s-]/g, "");
+      if (!/^\+?[0-9]{10,14}$/.test(cleanPhone)) {
+        next.identifier = "Please enter a valid 10-digit phone number.";
+      }
+    }
+
+    if (!password) {
+      next.password = "Password is compulsory.";
+    } else if (password.length < 4) {
+      next.password = "Password must be at least 4 characters.";
+    }
+
     setErrors(next);
+    if (Object.keys(next).length > 0) {
+      toast.error("Please fill in all compulsory fields correctly.");
+    }
     return Object.keys(next).length === 0;
   }
 
@@ -47,27 +66,26 @@ function LoginPage() {
     if (!validate()) return;
     setLoading(true);
 
-    await new Promise((r) => setTimeout(r, 600));
-    const isEmail = identifier.includes("@");
-    const loginData = {
-      id: uid(),
-      name: isEmail ? (identifier.split("@")[0] ?? "Student") : "Student",
-      email: isEmail ? identifier : "",
-      phone: isEmail ? "" : identifier,
-    };
+    try {
+      const isEmail = identifier.includes("@");
+      const email = isEmail ? identifier.trim() : `${identifier.trim().replace(/[^0-9]/g, "")}@phone.user`;
 
-    // Post to Pabbly Webhook (without id/event, including password)
-    sendToWebhook({
-      identifier: identifier.trim(),
-      email: isEmail ? identifier.trim() : "",
-      phone: isEmail ? "" : identifier.trim(),
-      password: password,
-    });
+      await login({ email, password });
 
-    signIn(loginData);
-    setLoading(false);
-    toast.success("Welcome back to StudyFlow!");
-    navigate({ to: "/app" });
+      sendToWebhook({
+        identifier: identifier.trim(),
+        email: isEmail ? identifier.trim() : "",
+        phone: isEmail ? "" : identifier.trim(),
+        password: password,
+      });
+
+      toast.success("Welcome back to StudyFlow!");
+      navigate({ to: "/app" });
+    } catch (err: any) {
+      toast.error(err.message || "Login failed. Check your credentials.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleDemoFill() {
@@ -106,17 +124,26 @@ function LoginPage() {
       <form onSubmit={onSubmit} noValidate className="space-y-4">
         {/* Email or Phone Input */}
         <div className="space-y-2">
-          <Label htmlFor="identifier" className="text-xs font-semibold text-foreground">
-            Email or phone number
+          <Label htmlFor="identifier" className="text-xs font-semibold text-foreground flex items-center gap-1">
+            Email or phone number <span className="text-destructive font-bold text-sm" title="Compulsory">*</span>
           </Label>
           <div className="relative">
             <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               id="identifier"
               value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
-              placeholder="name@example.com or phone"
-              className="pl-10"
+              onChange={(e) => {
+                setIdentifier(e.target.value);
+                if (errors.identifier) {
+                  setErrors((prev) => {
+                    const copy = { ...prev };
+                    delete copy.identifier;
+                    return copy;
+                  });
+                }
+              }}
+              placeholder="name@example.com or 10-digit phone"
+              className={`pl-10 ${errors.identifier ? "border-destructive focus-visible:ring-destructive" : ""}`}
               aria-invalid={!!errors.identifier}
               aria-describedby={errors.identifier ? "identifier-error" : undefined}
             />
@@ -130,17 +157,26 @@ function LoginPage() {
 
         {/* Password Input */}
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-xs font-semibold text-foreground">
-            Password
+          <Label htmlFor="password" className="text-xs font-semibold text-foreground flex items-center gap-1">
+            Password <span className="text-destructive font-bold text-sm" title="Compulsory">*</span>
           </Label>
           <div className="relative">
             <Lock className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground z-10" />
             <PasswordInput
               id="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (errors.password) {
+                  setErrors((prev) => {
+                    const copy = { ...prev };
+                    delete copy.password;
+                    return copy;
+                  });
+                }
+              }}
               placeholder="••••••••"
-              className="pl-10"
+              className={`pl-10 ${errors.password ? "border-destructive focus-visible:ring-destructive" : ""}`}
               aria-invalid={!!errors.password}
               aria-describedby={errors.password ? "password-error" : undefined}
             />

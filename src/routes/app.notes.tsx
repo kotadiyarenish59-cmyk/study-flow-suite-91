@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { NotebookPen, Pin, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,10 @@ function NotesPage() {
 
   function addNote(e: React.FormEvent) {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!title.trim()) {
+      toast.error("Please enter a note title.");
+      return;
+    }
     const newNote = {
       id: uid(),
       title: title.trim(),
@@ -45,6 +49,7 @@ function NotesPage() {
     setNotes((prev) => [newNote, ...prev]);
     setTitle("");
     setContent("");
+    toast.success("Note saved successfully!");
   }
 
   return (

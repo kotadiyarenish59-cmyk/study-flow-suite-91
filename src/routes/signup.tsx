@@ -40,7 +40,7 @@ interface Fields {
 
 function SignupPage() {
   const navigate = useNavigate();
-  const { signIn } = useStore();
+  const { signup } = useStore();
   const [values, setValues] = useState<Fields>({
     name: "",
     email: "",
@@ -53,18 +53,80 @@ function SignupPage() {
   const [errors, setErrors] = useState<Partial<Record<keyof Fields | "agree", string>>>({});
   const [loading, setLoading] = useState(false);
 
-  const set = (key: keyof Fields) => (e: React.ChangeEvent<HTMLInputElement>) =>
+  const set = (key: keyof Fields) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setValues((v) => ({ ...v, [key]: e.target.value }));
+    if (errors[key]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    }
+  };
+
+  const handleAgreeChange = (v: boolean) => {
+    setAgree(v);
+    if (errors.agree && v) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.agree;
+        return next;
+      });
+    }
+  };
 
   function validate() {
     const next: Partial<Record<keyof Fields | "agree", string>> = {};
-    if (values.name.trim().length < 2) next.name = "Please enter your full name.";
-    if (!/^\S+@\S+\.\S+$/.test(values.email)) next.email = "Enter a valid email address.";
-    if (!/^\+?\d[\d\s-]{7,}$/.test(values.phone)) next.phone = "Enter a valid phone number.";
-    if (values.password.length < 4) next.password = "Use at least 4 characters.";
-    if (values.confirm !== values.password) next.confirm = "Passwords don't match.";
-    if (!agree) next.agree = "Please accept the Terms & Conditions.";
+
+    // 1. Full Name (Compulsory)
+    const trimmedName = values.name.trim();
+    if (!trimmedName) {
+      next.name = "Full name is compulsory.";
+    } else if (trimmedName.length < 2) {
+      next.name = "Full name must be at least 2 characters.";
+    } else if (!/^[a-zA-Z\s'.]+$/.test(trimmedName)) {
+      next.name = "Name should contain only valid letters.";
+    }
+
+    // 2. Email Address (Compulsory)
+    const trimmedEmail = values.email.trim();
+    if (!trimmedEmail) {
+      next.email = "Email address is compulsory.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(trimmedEmail)) {
+      next.email = "Please enter a valid email address (e.g. name@example.com).";
+    }
+
+    // 3. Phone Number (Compulsory)
+    const cleanPhone = values.phone.replace(/[\s-]/g, "");
+    if (!values.phone.trim()) {
+      next.phone = "Phone number is compulsory.";
+    } else if (!/^\+?[0-9]{10,14}$/.test(cleanPhone)) {
+      next.phone = "Please enter a valid 10-digit mobile number.";
+    }
+
+    // 4. Password (Compulsory)
+    if (!values.password) {
+      next.password = "Password is compulsory.";
+    } else if (values.password.length < 4) {
+      next.password = "Password must be at least 4 characters.";
+    }
+
+    // 5. Confirm Password (Compulsory)
+    if (!values.confirm) {
+      next.confirm = "Confirm password is compulsory.";
+    } else if (values.confirm !== values.password) {
+      next.confirm = "Passwords do not match.";
+    }
+
+    // 6. Terms & Conditions (Compulsory)
+    if (!agree) {
+      next.agree = "You must accept the Terms & Conditions to proceed.";
+    }
+
     setErrors(next);
+    if (Object.keys(next).length > 0) {
+      toast.error("Please fill in all compulsory fields correctly.");
+    }
     return Object.keys(next).length === 0;
   }
 
@@ -72,26 +134,29 @@ function SignupPage() {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    // Demo auth only: the password is never persisted. Connect a real backend later.
-    await new Promise((r) => setTimeout(r, 700));
-    const userData = {
-      id: uid(),
-      name: values.name.trim(),
-      email: values.email.trim(),
-      phone: values.phone.trim(),
-      goal: values.goal.trim(),
-    };
-    sendToWebhook({
-      name: values.name.trim(),
-      email: values.email.trim(),
-      phone: values.phone.trim(),
-      password: values.password,
-      goal: values.goal.trim(),
-    });
-    signIn(userData);
-    setLoading(false);
-    toast.success("Account created. Let's get studying!");
-    navigate({ to: "/app" });
+
+    try {
+      await signup({
+        email: values.email.trim(),
+        password: values.password,
+        full_name: values.name.trim(),
+      });
+
+      sendToWebhook({
+        name: values.name.trim(),
+        email: values.email.trim(),
+        phone: values.phone.trim(),
+        password: values.password,
+        goal: values.goal.trim(),
+      });
+
+      toast.success("Account created successfully. Welcome to StudyFlow!");
+      navigate({ to: "/app" });
+    } catch (err: any) {
+      toast.error(err.message || "Signup failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   const field = (
@@ -102,9 +167,12 @@ function SignupPage() {
     optional = false,
   ) => (
     <div className="space-y-2">
-      <Label htmlFor={id}>
-        {label}
-        {optional && <span className="ml-1 text-xs text-muted-foreground">(optional)</span>}
+      <Label htmlFor={id} className="text-xs font-semibold text-foreground flex items-center justify-between">
+        <span className="flex items-center gap-1">
+          {label}
+          {!optional && <span className="text-destructive font-bold text-sm" title="Compulsory">*</span>}
+        </span>
+        {optional && <span className="text-[11px] font-normal text-muted-foreground">(optional)</span>}
       </Label>
       <Input
         id={id}
@@ -114,6 +182,7 @@ function SignupPage() {
         placeholder={placeholder}
         aria-invalid={!!errors[id]}
         aria-describedby={errors[id] ? `${id}-error` : undefined}
+        className={errors[id] ? "border-destructive focus-visible:ring-destructive" : ""}
       />
       {errors[id] && (
         <p id={`${id}-error`} className="text-xs font-medium text-destructive">
@@ -139,16 +208,19 @@ function SignupPage() {
       <form onSubmit={onSubmit} noValidate className="space-y-4">
         {field("name", "Full name", "Enter your full name")}
         {field("email", "Email address", "Enter your email address", "email")}
-        {field("phone", "Phone number", "Enter your mobile number", "tel")}
+        {field("phone", "Phone number", "Enter 10-digit mobile number", "tel")}
 
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password" className="text-xs font-semibold text-foreground flex items-center gap-1">
+            Password <span className="text-destructive font-bold text-sm" title="Compulsory">*</span>
+          </Label>
           <PasswordInput
             id="password"
             value={values.password}
             onChange={set("password")}
             placeholder="At least 4 characters"
             aria-invalid={!!errors.password}
+            className={errors.password ? "border-destructive focus-visible:ring-destructive" : ""}
           />
           {errors.password && (
             <p className="text-xs font-medium text-destructive">{errors.password}</p>
@@ -156,30 +228,35 @@ function SignupPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="confirm">Confirm password</Label>
+          <Label htmlFor="confirm" className="text-xs font-semibold text-foreground flex items-center gap-1">
+            Confirm password <span className="text-destructive font-bold text-sm" title="Compulsory">*</span>
+          </Label>
           <PasswordInput
             id="confirm"
             value={values.confirm}
             onChange={set("confirm")}
             placeholder="Re-enter your password"
             aria-invalid={!!errors.confirm}
+            className={errors.confirm ? "border-destructive focus-visible:ring-destructive" : ""}
           />
           {errors.confirm && (
             <p className="text-xs font-medium text-destructive">{errors.confirm}</p>
           )}
         </div>
 
-        {field("goal", "Learning goal", "", "text", true)}
+        {field("goal", "Learning goal", "e.g. Master Python, Crack DSA", "text", true)}
 
-        <div>
-          <label className="flex items-start gap-2 text-sm text-muted-foreground">
+        <div className="pt-1">
+          <label className="flex items-start gap-2 text-sm text-muted-foreground cursor-pointer">
             <Checkbox
               id="terms"
               checked={agree}
-              onCheckedChange={(v) => setAgree(v === true)}
+              onCheckedChange={(v) => handleAgreeChange(v === true)}
               className="mt-0.5"
             />
-            I agree to the Terms &amp; Conditions.
+            <span>
+              I agree to the Terms &amp; Conditions <span className="text-destructive font-bold" title="Compulsory">*</span>
+            </span>
           </label>
           {errors.agree && <p className="mt-1 text-xs font-medium text-destructive">{errors.agree}</p>}
         </div>
