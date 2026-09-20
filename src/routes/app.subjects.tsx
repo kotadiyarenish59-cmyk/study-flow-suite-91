@@ -90,24 +90,12 @@ function SubjectsPage() {
       {subjects.length ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {subjects.map((subject) => (
-            <div key={subject.id} className="group relative">
-              <SubjectCard
-                subject={subject}
-                onOpen={() => setOpenId(openId === subject.id ? null : subject.id)}
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:bg-destructive/10"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDeleteSubject(subject.id, subject.name);
-                }}
-                title="Delete subject"
-              >
-                <Trash2 className="size-4" />
-              </Button>
-            </div>
+            <SubjectCard
+              key={subject.id}
+              subject={subject}
+              onOpen={() => setOpenId(openId === subject.id ? null : subject.id)}
+              onDelete={() => handleDeleteSubject(subject.id, subject.name)}
+            />
           ))}
         </div>
       ) : (

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { api, getStoredToken, removeStoredToken, setStoredToken } from "./api";
+import { api, getStoredToken, removeStoredToken, setStoredToken, getStoredUser, setStoredUser, removeStoredUser } from "./api";
 import type {
   Goal,
   Note,
@@ -104,11 +104,25 @@ const StoreContext = createContext<StoreValue | null>(null);
 export const uid = () => Math.random().toString(36).slice(2, 10);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<State>(initialState);
+  const [state, setState] = useState<State>(() => {
+    const storedUser = getStoredUser();
+    const token = getStoredToken();
+    if (token && storedUser) {
+      return {
+        ...initialState,
+        user: storedUser,
+        ready: true,
+      };
+    }
+    return initialState;
+  });
 
   async function loadInitialData() {
     const token = getStoredToken();
+    const storedUser = getStoredUser();
+
     if (!token) {
+      removeStoredUser();
       setState((s) => ({ ...s, user: null, ready: true }));
       return;
     }
@@ -117,6 +131,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setState((s) => ({ ...s, loading: true, error: null }));
       const me = await api.auth.getMe();
       const user = mapBackendUser(me);
+      setStoredUser(user);
 
       const [rawSubjects, rawTasks] = await Promise.all([
         api.subjects.list().catch(() => []),
@@ -134,16 +149,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         ready: true,
         loading: false,
       }));
-    } catch {
-      removeStoredToken();
-      setState((s) => ({
-        ...s,
-        user: null,
-        subjects: [],
-        tasks: [],
-        ready: true,
-        loading: false,
-      }));
+    } catch (err: any) {
+      if (err?.status === 401) {
+        removeStoredToken();
+        removeStoredUser();
+        setState((s) => ({
+          ...s,
+          user: null,
+          subjects: [],
+          tasks: [],
+          ready: true,
+          loading: false,
+        }));
+      } else {
+        // Keep stored user if temporary network issue or server restart
+        setState((s) => ({
+          ...s,
+          user: s.user || storedUser,
+          ready: true,
+          loading: false,
+        }));
+      }
     }
   }
 
@@ -157,6 +183,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const res = await api.auth.login(payload);
       setStoredToken(res.access_token);
       const user = mapBackendUser(res.user);
+      setStoredUser(user);
 
       const [rawSubjects, rawTasks] = await Promise.all([
         api.subjects.list().catch(() => []),
@@ -188,6 +215,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setStoredToken(res.access_token);
       }
       const user = mapBackendUser(res.user);
+      setStoredUser(user);
       setState((s) => ({
         ...s,
         user,
@@ -204,6 +232,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const signOutAction = () => {
     removeStoredToken();
+    removeStoredUser();
     setState((s) => ({
       ...s,
       user: null,

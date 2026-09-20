@@ -30,6 +30,31 @@ export function removeStoredToken(): void {
   }
 }
 
+const USER_KEY = "studyflow_user_data";
+
+export function getStoredUser(): any | null {
+  if (typeof window === "undefined") return null;
+  const raw = localStorage.getItem(USER_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+export function setStoredUser(user: any): void {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+  }
+}
+
+export function removeStoredUser(): void {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(USER_KEY);
+  }
+}
+
 export class ApiError extends Error {
   status: number;
   detail: any;
