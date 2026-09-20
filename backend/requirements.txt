@@ -76,3 +76,5 @@ yarl==1.24.5
 pydantic-settings>=2.0.0
 
 pydantic-settings>=2.0.0
+
+email-validator
