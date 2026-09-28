@@ -50,8 +50,8 @@ function LoginPage() {
 
     if (!password) {
       next.password = "Password is compulsory.";
-    } else if (password.length < 4) {
-      next.password = "Password must be at least 4 characters.";
+    } else if (password.length < 6) {
+      next.password = "Password must be at least 6 characters long";
     }
 
     setErrors(next);
@@ -90,7 +90,7 @@ function LoginPage() {
 
   function handleDemoFill() {
     setIdentifier("student@studyflow.com");
-    setPassword("1234");
+    setPassword("123456");
     setErrors({});
     toast.info("Demo credentials filled!");
   }
@@ -165,6 +165,7 @@ function LoginPage() {
             <PasswordInput
               id="password"
               value={password}
+              minLength={6}
               onChange={(e) => {
                 setPassword(e.target.value);
                 if (errors.password) {
@@ -178,12 +179,16 @@ function LoginPage() {
               placeholder="••••••••"
               className={`pl-10 ${errors.password ? "border-destructive focus-visible:ring-destructive" : ""}`}
               aria-invalid={!!errors.password}
-              aria-describedby={errors.password ? "password-error" : undefined}
+              aria-describedby={errors.password ? "password-error" : "password-helper"}
             />
           </div>
-          {errors.password && (
+          {errors.password ? (
             <p id="password-error" className="text-xs font-medium text-destructive">
               {errors.password}
+            </p>
+          ) : (
+            <p id="password-helper" className="text-xs text-muted-foreground">
+              Password must be at least 6 characters long
             </p>
           )}
         </div>

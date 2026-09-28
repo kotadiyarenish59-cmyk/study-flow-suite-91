@@ -107,8 +107,8 @@ function SignupPage() {
     // 4. Password (Compulsory)
     if (!values.password) {
       next.password = "Password is compulsory.";
-    } else if (values.password.length < 4) {
-      next.password = "Password must be at least 4 characters.";
+    } else if (values.password.length < 6) {
+      next.password = "Password must be at least 6 characters long";
     }
 
     // 5. Confirm Password (Compulsory)
@@ -217,13 +217,19 @@ function SignupPage() {
           <PasswordInput
             id="password"
             value={values.password}
+            minLength={6}
             onChange={set("password")}
-            placeholder="At least 4 characters"
+            placeholder="At least 6 characters"
             aria-invalid={!!errors.password}
+            aria-describedby={errors.password ? "password-error" : "password-helper"}
             className={errors.password ? "border-destructive focus-visible:ring-destructive" : ""}
           />
-          {errors.password && (
-            <p className="text-xs font-medium text-destructive">{errors.password}</p>
+          {errors.password ? (
+            <p id="password-error" className="text-xs font-medium text-destructive">{errors.password}</p>
+          ) : (
+            <p id="password-helper" className="text-xs text-muted-foreground">
+              Password must be at least 6 characters long
+            </p>
           )}
         </div>
 
@@ -234,13 +240,15 @@ function SignupPage() {
           <PasswordInput
             id="confirm"
             value={values.confirm}
+            minLength={6}
             onChange={set("confirm")}
             placeholder="Re-enter your password"
             aria-invalid={!!errors.confirm}
+            aria-describedby={errors.confirm ? "confirm-error" : undefined}
             className={errors.confirm ? "border-destructive focus-visible:ring-destructive" : ""}
           />
           {errors.confirm && (
-            <p className="text-xs font-medium text-destructive">{errors.confirm}</p>
+            <p id="confirm-error" className="text-xs font-medium text-destructive">{errors.confirm}</p>
           )}
         </div>
 

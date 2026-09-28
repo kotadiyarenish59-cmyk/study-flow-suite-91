@@ -1,4 +1,10 @@
 import type {
+  Goal,
+  GoalCreatePayload,
+  GoalMilestone,
+  PlannerEvent,
+  PlannerEventCreatePayload,
+  PlannerEventUpdatePayload,
   SubjectCreatePayload,
   SubjectResponse,
   TaskCreatePayload,
@@ -7,8 +13,10 @@ import type {
   TokenData,
   UserLoginPayload,
   UserProfile,
+  UserProfileUpdatePayload,
   UserSignupPayload,
 } from "./types";
+
 
 const API_BASE_URL = (import.meta.env as Record<string, string>)["VITE_API_URL"] || "http://127.0.0.1:8000/api/v1";
 const TOKEN_KEY = "studyflow_access_token";
@@ -132,6 +140,12 @@ export const api = {
 
     getMe: (): Promise<UserProfile> =>
       apiFetch<UserProfile>("/auth/me", { method: "GET" }, true),
+
+    updateProfile: (payload: UserProfileUpdatePayload): Promise<UserProfile> =>
+      apiFetch<UserProfile>("/auth/profile", {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      }, true),
   },
 
   subjects: {
@@ -171,5 +185,44 @@ export const api = {
 
     delete: (taskId: string): Promise<void> =>
       apiFetch<void>(`/tasks/${taskId}`, { method: "DELETE" }, true),
+  },
+
+  goals: {
+    list: (): Promise<Goal[]> =>
+      apiFetch<Goal[]>("/goals", { method: "GET" }, true),
+
+    create: (payload: GoalCreatePayload): Promise<Goal> =>
+      apiFetch<Goal>("/goals", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }, true),
+
+    toggleMilestone: (goalId: string, milestoneId: string): Promise<GoalMilestone> =>
+      apiFetch<GoalMilestone>(`/goals/${goalId}/milestones/${milestoneId}`, {
+        method: "PATCH",
+      }, true),
+
+    delete: (goalId: string): Promise<void> =>
+      apiFetch<void>(`/goals/${goalId}`, { method: "DELETE" }, true),
+  },
+
+  planner: {
+    list: (): Promise<PlannerEvent[]> =>
+      apiFetch<PlannerEvent[]>("/planner", { method: "GET" }, true),
+
+    create: (payload: PlannerEventCreatePayload): Promise<PlannerEvent> =>
+      apiFetch<PlannerEvent>("/planner", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }, true),
+
+    update: (eventId: string, payload: PlannerEventUpdatePayload): Promise<PlannerEvent> =>
+      apiFetch<PlannerEvent>(`/planner/${eventId}`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      }, true),
+
+    delete: (eventId: string): Promise<void> =>
+      apiFetch<void>(`/planner/${eventId}`, { method: "DELETE" }, true),
   },
 };

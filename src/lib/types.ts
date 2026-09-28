@@ -14,8 +14,22 @@ export interface UserProfile {
   id: string;
   email: string;
   full_name?: string | null;
+  name?: string | null;
+  phone?: string | null;
+  learning_goal?: string | null;
+  goal?: string | null;
   created_at?: string | null;
 }
+
+export interface UserProfileUpdatePayload {
+  name?: string;
+  full_name?: string;
+  email?: string;
+  phone?: string;
+  learning_goal?: string;
+  goal?: string;
+}
+
 
 export interface UserSignupPayload {
   email: string;
@@ -108,21 +122,63 @@ export interface Note {
   updatedAt: string;
 }
 
+export interface GoalMilestone {
+  id: string;
+  goal_id?: string;
+  title: string;
+  is_completed: boolean;
+  done?: boolean;
+}
+
 export interface Goal {
   id: string;
+  user_id?: string;
   title: string;
-  description: string;
-  deadline: string;
-  steps: { id: string; title: string; done: boolean }[];
+  category?: string;
+  description?: string;
+  target_date?: string | null;
+  deadline?: string | null;
+  status?: string;
+  milestones?: GoalMilestone[];
+  steps?: { id: string; title: string; done: boolean }[];
+}
+
+export interface GoalCreatePayload {
+  title: string;
+  category?: string;
+  target_date?: string;
+  milestones?: string[];
 }
 
 export interface PlannerEvent {
   id: string;
-  day: string;
-  subjectId?: string;
-  activity: string;
-  start: string;
-  minutes: number;
+  user_id?: string;
+  day_of_week?: string;
+  day?: string;
+  title?: string;
+  activity?: string;
+  start_time?: string;
+  start?: string;
+  end_time?: string;
+  minutes?: number;
+  subject_id?: string | null;
+  subjectId?: string | null;
+}
+
+export interface PlannerEventCreatePayload {
+  day_of_week: string;
+  title: string;
+  start_time: string;
+  end_time: string;
+  subject_id?: string | null;
+}
+
+export interface PlannerEventUpdatePayload {
+  day_of_week?: string;
+  title?: string;
+  start_time?: string;
+  end_time?: string;
+  subject_id?: string | null;
 }
 
 export interface StudySession {
